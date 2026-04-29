@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart · School Performance Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-0:#0b1020;
+  --bg-1:#0f1730;
+  --panel:#121a38;
+  --panel-2:#182247;
+  --border:rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.14);
+  --text:#e7ecf7;
+  --text-dim:#9aa6c2;
+  --text-mute:#6c7aa0;
+  --brand:#7c5cff;
+  --brand-2:#22d3ee;
+  --brand-3:#f472b6;
+  --ok:#22c55e;
+  --warn:#f59e0b;
+  --bad:#ef4444;
+  --shadow: 0 20px 60px rgba(9,12,28,.55);
+  --radius:14px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 800px at -10% -20%, rgba(124,92,255,.22), transparent 60%),
+    radial-gradient(1000px 700px at 110% 0%, rgba(34,211,238,.18), transparent 60%),
+    radial-gradient(900px 600px at 50% 120%, rgba(244,114,182,.12), transparent 60%),
+    linear-gradient(180deg, var(--bg-0), var(--bg-1));
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Animated grid background */
+body::before{
+  content:"";
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size:40px 40px;
+  mask-image: radial-gradient(circle at 50% 30%, #000 10%, transparent 75%);
+  pointer-events:none;
+  z-index:0;
+}
+
+.app{
+  display:grid;
+  grid-template-columns: 280px 1fr;
+  min-height:100vh;
+  position:relative;
+  z-index:1;
+}
+
+/* ===== Sidebar ===== */
+.sidebar{
+  position:sticky; top:0;
+  height:100vh;
+  padding:24px 18px;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(18,26,56,.85), rgba(12,18,40,.85));
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; gap:20px;
+  overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08); border-radius:10px}
+
+.brand{
+  display:flex; align-items:center; gap:12px;
+  padding:6px 8px 14px;
+  border-bottom:1px solid var(--border);
+}
+.brand-logo{
+  width:42px; height:42px; border-radius:12px;
+  background: conic-gradient(from 210deg at 50% 50%, #7c5cff, #22d3ee, #f472b6, #7c5cff);
+  position:relative;
+  box-shadow: 0 10px 30px rgba(124,92,255,.45);
+}
+.brand-logo::after{
+  content:"S";
+  position:absolute; inset:3px;
+  border-radius:10px;
+  background:linear-gradient(180deg,#121a38,#0e1432);
+  display:flex; align-items:center; justify-content:center;
+  font-family:"Space Grotesk"; font-weight:700; font-size:20px;
+  color:#e7ecf7;
+}
+.brand-name{font-family:"Space Grotesk"; font-weight:700; letter-spacing:.4px; font-size:18px}
+.brand-sub{font-size:11px; color:var(--text-mute); letter-spacing:2px; text-transform:uppercase}
+
+.nav-label{
+  font-size:11px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--text-mute); padding:10px 10px 6px;
+}
+
+.nav{display:flex; flex-direction:column; gap:4px}
+.nav-item{
+  all:unset; cursor:pointer;
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px;
+  font-size:14px; color:var(--text-dim);
+  transition: all .18s ease;
+  border:1px solid transparent;
+}
+.nav-item:hover{color:var(--text); background:rgba(255,255,255,.04)}
+.nav-item.active{
+  color:var(--text);
+  background: linear-gradient(90deg, rgba(124,92,255,.22), rgba(34,211,238,.14));
+  border-color: rgba(124,92,255,.35);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.nav-item .dot{
+  width:8px; height:8px; border-radius:50%;
+  background:linear-gradient(135deg,#7c5cff,#22d3ee);
+  opacity:.7;
+}
+.nav-item.active .dot{
+  opacity:1;
+  box-shadow:0 0 10px 2px rgba(124,92,255,.6);
+}
+
+.classes-grid{
+  display:grid; grid-template-columns: repeat(2, 1fr); gap:6px;
+  padding:2px;
+}
+.class-chip{
+  all:unset; cursor:pointer; text-align:center;
+  padding:9px 8px; border-radius:10px;
+  font-size:13px; font-weight:600;
+  color:var(--text-dim);
+  background: rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  transition: all .2s ease;
+}
+.class-chip:hover{color:var(--text); transform:translateY(-1px); border-color:var(--border-strong)}
+.class-chip.active{
+  color:#fff;
+  background: linear-gradient(135deg, rgba(124,92,255,.35), rgba(34,211,238,.25));
+  border-color: rgba(124,92,255,.55);
+  box-shadow: 0 6px 18px rgba(124,92,255,.25);
+}
+
+.sidebar-footer{
+  margin-top:auto;
+  padding:12px; border-radius:12px;
+  background: linear-gradient(135deg, rgba(124,92,255,.14), rgba(34,211,238,.08));
+  border:1px solid var(--border);
+  font-size:12px; color:var(--text-dim);
+}
+.sidebar-footer b{color:#fff}
+
+/* ===== Main ===== */
+.main{padding:28px 34px 60px; min-width:0}
+
+.topbar{
+  display:flex; align-items:center; gap:16px;
+  margin-bottom:22px;
+}
+.page-title{
+  font-family:"Space Grotesk";
+  font-size:26px; font-weight:700; letter-spacing:.3px;
+  background: linear-gradient(90deg,#fff, #c9d1ff 60%, #22d3ee);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.page-sub{color:var(--text-mute); font-size:13px; margin-top:2px}
+
+.controls{
+  margin-left:auto;
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.control{
+  display:flex; align-items:center; gap:8px;
+  background: rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  padding:9px 12px; border-radius:12px;
+  font-size:13px; color:var(--text);
+  backdrop-filter: blur(6px);
+}
+.control input, .control select{
+  all:unset; min-width:180px;
+  color:var(--text); font-size:13px;
+}
+.control input::placeholder{color:var(--text-mute)}
+.control select option{background:#121a38; color:var(--text)}
+.control svg{width:16px; height:16px; color:var(--text-mute)}
+.control:focus-within{border-color: rgba(124,92,255,.5); box-shadow: 0 0 0 3px rgba(124,92,255,.12)}
+
+/* KPI row */
+.kpis{
+  display:grid; grid-template-columns: repeat(4, 1fr); gap:14px;
+  margin-bottom:26px;
+}
+.kpi{
+  padding:18px; border-radius:16px;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border:1px solid var(--border);
+  position:relative; overflow:hidden;
+}
+.kpi::before{
+  content:""; position:absolute; inset:-1px;
+  background: radial-gradient(400px 120px at 0% 0%, rgba(124,92,255,.25), transparent 60%);
+  pointer-events:none;
+}
+.kpi h4{margin:0; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--text-mute)}
+.kpi .val{font-family:"Space Grotesk"; font-size:28px; font-weight:700; margin-top:8px}
+.kpi .delta{font-size:12px; margin-top:4px; color:var(--ok)}
+.kpi .delta.bad{color:var(--bad)}
+.kpi .icon{
+  position:absolute; right:14px; top:14px;
+  width:34px; height:34px; border-radius:10px;
+  background: linear-gradient(135deg, rgba(124,92,255,.3), rgba(34,211,238,.3));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff;
+}
+.kpi .icon svg{width:18px; height:18px}
+
+/* Report section */
+.report{
+  margin-bottom:40px;
+}
+.report-header{
+  display:flex; align-items:flex-end; gap:14px;
+  margin: 10px 0 18px;
+  padding-bottom:10px;
+  border-bottom:1px dashed var(--border);
+}
+.report-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 12px; border-radius:999px;
+  background: linear-gradient(135deg, rgba(124,92,255,.25), rgba(34,211,238,.18));
+  border:1px solid rgba(124,92,255,.35);
+  font-size:12px; font-weight:600; letter-spacing:.4px;
+}
+.report-badge .pulse{
+  width:8px; height:8px; border-radius:50%;
+  background:#22d3ee; box-shadow: 0 0 0 0 rgba(34,211,238,.6);
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(34,211,238,.6)}
+  70%{box-shadow:0 0 0 10px rgba(34,211,238,0)}
+  100%{box-shadow:0 0 0 0 rgba(34,211,238,0)}
+}
+.report-title{
+  font-family:"Space Grotesk"; font-size:22px; font-weight:700;
+}
+.report-title.nov{
+  background: linear-gradient(90deg,#f472b6,#a78bfa,#22d3ee);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* Grid of class tables */
+.class-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap:18px;
+}
+
+.card{
+  background: linear-gradient(180deg, rgba(18,26,56,.9), rgba(14,20,45,.85));
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  overflow:hidden;
+  box-shadow: var(--shadow);
+  position:relative;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.card:hover{
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+  box-shadow: 0 30px 70px rgba(9,12,28,.7);
+}
+.card::before{
+  content:""; position:absolute; left:0; top:0; height:3px; width:100%;
+  background: linear-gradient(90deg, #7c5cff, #22d3ee, #f472b6);
+  opacity:.85;
+}
+
+.card-head{
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+}
+.class-tag{
+  font-family:"Space Grotesk"; font-weight:700;
+  padding:6px 10px; border-radius:10px; font-size:13px;
+  background: linear-gradient(135deg, rgba(124,92,255,.35), rgba(34,211,238,.25));
+  border:1px solid rgba(124,92,255,.4);
+  letter-spacing:.4px;
+}
+.card-head h3{
+  margin:0; font-size:15px; font-weight:600;
+}
+.card-head .meta{
+  margin-left:auto;
+  display:flex; gap:14px; align-items:center;
+  font-size:12px; color:var(--text-mute);
+}
+.card-head .meta b{color:var(--text); font-weight:600}
+.card-head .avg{
+  padding:4px 10px; border-radius:999px;
+  font-family:"Space Grotesk"; font-weight:700; font-size:13px;
+  background: rgba(34,197,94,.14); color:#86efac;
+  border:1px solid rgba(34,197,94,.25);
+}
+
+/* Table */
+.table-wrap{overflow:auto}
+table{
+  width:100%; border-collapse:separate; border-spacing:0;
+  font-size:13px;
+}
+thead th{
+  position:sticky; top:0;
+  text-align:left; font-weight:600; color:var(--text-dim);
+  padding:10px 14px; font-size:11px;
+  text-transform:uppercase; letter-spacing:1.2px;
+  background: rgba(255,255,255,.02);
+  border-bottom:1px solid var(--border);
+  cursor:default; user-select:none;
+}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{color:var(--text)}
+thead th .arrow{display:inline-block; width:10px; margin-left:4px; opacity:.55}
+thead th.sort-asc .arrow::after{content:"▲"}
+thead th.sort-desc .arrow::after{content:"▼"}
+
+tbody tr{transition: background .15s ease}
+tbody tr:hover{background: rgba(255,255,255,.03)}
+tbody td{
+  padding:11px 14px;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  color:var(--text);
+}
+tbody tr:last-child td{border-bottom:none}
+
+.avatar{
+  width:28px; height:28px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:700; color:#fff;
+  margin-right:10px; vertical-align:middle;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.name-cell{display:flex; align-items:center}
+.name-cell .who{display:flex; flex-direction:column; line-height:1.15}
+.name-cell .who small{color:var(--text-mute); font-size:11px}
+
+.subject-chip{
+  display:inline-block; padding:3px 9px; border-radius:999px;
+  font-size:11px; font-weight:600;
+  background: rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  color:var(--text-dim);
+}
+
+/* Percent bar */
+.perc{
+  display:flex; align-items:center; gap:10px;
+  min-width:160px;
+}
+.bar{
+  flex:1; height:6px; border-radius:999px;
+  background: rgba(255,255,255,.06); overflow:hidden;
+  position:relative;
+}
+.bar > span{
+  display:block; height:100%; border-radius:999px;
+  background: linear-gradient(90deg, #22d3ee, #7c5cff);
+  box-shadow: 0 0 12px rgba(124,92,255,.5);
+  transition: width .6s cubic-bezier(.2,.7,.2,1);
+}
+.bar.low > span{background: linear-gradient(90deg,#f59e0b,#ef4444)}
+.bar.mid > span{background: linear-gradient(90deg,#22d3ee,#7c5cff)}
+.bar.high > span{background: linear-gradient(90deg,#22c55e,#22d3ee)}
+.pct-text{
+  font-family:"Space Grotesk"; font-weight:700; font-size:13px;
+  min-width:44px; text-align:right;
+}
+.pct-text.low{color:#fca5a5}
+.pct-text.mid{color:#c4b5fd}
+.pct-text.high{color:#86efac}
+
+/* Empty state */
+.empty{
+  padding:22px; text-align:center; color:var(--text-mute); font-size:13px;
+}
+
+/* Scroll bars */
+.table-wrap::-webkit-scrollbar{height:8px; width:8px}
+.table-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08); border-radius:6px}
+
+/* Responsive */
+@media (max-width: 980px){
+  .app{grid-template-columns: 1fr}
+  .sidebar{position:relative; height:auto; border-right:none; border-bottom:1px solid var(--border)}
+  .kpis{grid-template-columns: repeat(2, 1fr)}
+  .main{padding:22px 18px 40px}
+  .controls{width:100%}
+  .control input, .control select{min-width:0; width:100%}
+}
+
+/* Fade-in animation */
+@keyframes rise{
+  from{opacity:0; transform: translateY(8px)}
+  to{opacity:1; transform:none}
+}
+.card{animation: rise .4s ease both}
+.card:nth-child(2){animation-delay:.04s}
+.card:nth-child(3){animation-delay:.08s}
+.card:nth-child(4){animation-delay:.12s}
+.card:nth-child(5){animation-delay:.16s}
+.card:nth-child(6){animation-delay:.2s}
+.card:nth-child(7){animation-delay:.24s}
+.card:nth-child(8){animation-delay:.28s}
+
+/* Switch */
+.view-switch{
+  display:inline-flex; padding:4px; border-radius:10px;
+  background: rgba(255,255,255,.04); border:1px solid var(--border);
+}
+.view-switch button{
+  all:unset; cursor:pointer;
+  padding:7px 12px; border-radius:7px;
+  font-size:12px; color:var(--text-dim); font-weight:600;
+}
+.view-switch button.on{
+  background: linear-gradient(135deg, rgba(124,92,255,.4), rgba(34,211,238,.28));
+  color:#fff;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo"></div>
+      <div>
+        <div class="brand-name">Smart Admin</div>
+        <div class="brand-sub">School OS</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-label">Overview</div>
+      <div class="nav">
+        <button class="nav-item active"><span class="dot"></span> Performance Dashboard</button>
+        <button class="nav-item"><span class="dot"></span> Students</button>
+        <button class="nav-item"><span class="dot"></span> Teachers</button>
+        <button class="nav-item"><span class="dot"></span> Subjects</button>
+        <button class="nav-item"><span class="dot"></span> Reports</button>
+        <button class="nav-item"><span class="dot"></span> Settings</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-label">Classes</div>
+      <div class="classes-grid" id="classesGrid">
+        <!-- chips injected here -->
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <b>Tip:</b> Click any column header to sort. Use the search to filter students across the selected classes.
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">School Performance Dashboard</div>
+        <div class="page-sub">Monthly reports · October &amp; November comparison</div>
+      </div>
+      <div class="controls">
+        <label class="control">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="search" placeholder="Search student by name..." />
+        </label>
+        <label class="control">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+          <select id="classFilter">
+            <option value="all">All classes</option>
+          </select>
+        </label>
+        <label class="control">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+          <select id="sortSelect">
+            <option value="none">Default order</option>
+            <option value="desc">Sort by % (high → low)</option>
+            <option value="asc">Sort by % (low → high)</option>
+          </select>
+        </label>
+        <div class="view-switch" id="viewSwitch">
+          <button data-view="both" class="on">Both</button>
+          <button data-view="oct">October</button>
+          <button data-view="nov">November</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis" id="kpis"></div>
+
+    <!-- October report -->
+    <section class="report" id="report-oct">
+      <div class="report-header">
+        <div class="report-badge"><span class="pulse"></span> Monthly snapshot</div>
+        <div>
+          <div class="report-title">Report · October 28</div>
+          <div class="page-sub">Per-class performance overview</div>
+        </div>
+      </div>
+      <div class="class-grid" id="grid-oct"></div>
+    </section>
+
+    <!-- November report -->
+    <section class="report" id="report-nov">
+      <div class="report-header">
+        <div class="report-badge" style="background: linear-gradient(135deg, rgba(244,114,182,.25), rgba(167,139,250,.18)); border-color: rgba(244,114,182,.35)">
+          <span class="pulse" style="background:#f472b6"></span> Updated snapshot
+        </div>
+        <div>
+          <div class="report-title nov">Report · November 28</div>
+          <div class="page-sub">Progress compared to October</div>
+        </div>
+      </div>
+      <div class="class-grid" id="grid-nov"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const DATA = {"5A":{"october":[{"firstName":"Kamola","lastName":"Ergashev","subject":"Geography","percent":96},{"firstName":"Aziz","lastName":"Aripov","subject":"Science","percent":100},{"firstName":"Jahongir","lastName":"Nazarov","subject":"English","percent":84},{"firstName":"Nodira","lastName":"Saidov","subject":"Mathematics","percent":93},{"firstName":"Kamola","lastName":"Gulomov","subject":"History","percent":67},{"firstName":"Adham","lastName":"Yusupov","subject":"Mathematics","percent":80},{"firstName":"Gavhar","lastName":"Hakimov","subject":"Music","percent":88},{"firstName":"Adham","lastName":"Usmonov","subject":"Geography","percent":62},{"firstName":"Behruz","lastName":"Islomov","subject":"Music","percent":75},{"firstName":"Farrux","lastName":"Odilov","subject":"Science","percent":64},{"firstName":"Nargiza","lastName":"Rasulov","subject":"English","percent":84}],"november":[{"firstName":"Kamola","lastName":"Ergashev","subject":"Geography","percent":74},{"firstName":"Aziz","lastName":"Aripov","subject":"Science","percent":100},{"firstName":"Jahongir","lastName":"Nazarov","subject":"English","percent":71},{"firstName":"Nodira","lastName":"Saidov","subject":"Mathematics","percent":95},{"firstName":"Kamola","lastName":"Gulomov","subject":"History","percent":86},{"firstName":"Adham","lastName":"Yusupov","subject":"Mathematics","percent":100},{"firstName":"Gavhar","lastName":"Hakimov","subject":"Music","percent":95},{"firstName":"Adham","lastName":"Usmonov","subject":"Geography","percent":82},{"firstName":"Behruz","lastName":"Islomov","subject":"Music","percent":79},{"firstName":"Farrux","lastName":"Odilov","subject":"Science","percent":82},{"firstName":"Nargiza","lastName":"Rasulov","subject":"English","percent":87}]},"5B":{"october":[{"firstName":"Islom","lastName":"Norqulov","subject":"History","percent":63},{"firstName":"Alisher","lastName":"Mamatqulov","subject":"Mathematics","percent":83},{"firstName":"Adham","lastName":"Xudoyberdiyev","subject":"Art","percent":69},{"firstName":"Shohruh","lastName":"Odilov","subject":"English","percent":96},{"firstName":"Nargiza","lastName":"Abdullayev","subject":"Art","percent":84},{"firstName":"Nargiza","lastName":"Rustamov","subject":"Physical Education","percent":60},{"firstName":"Shohruh","lastName":"Rustamov","subject":"Physical Education","percent":81},{"firstName":"Madina","lastName":"Teshayev","subject":"Science","percent":69},{"firstName":"Aziz","lastName":"Ergashev","subject":"Geography","percent":98},{"firstName":"Jahongir","lastName":"Olimov","subject":"Music","percent":73},{"firstName":"Nodira","lastName":"Davlatov","subject":"Art","percent":90},{"firstName":"Adham","lastName":"Salimov","subject":"Physical Education","percent":90},{"firstName":"Bekzod","lastName":"Boboyev","subject":"English","percent":78},{"firstName":"Madina","lastName":"Norqulov","subject":"Science","percent":93},{"firstName":"Alisher","lastName":"Saidov","subject":"English","percent":80},{"firstName":"Rayhona","lastName":"Ibrohimov","subject":"Physical Education","percent":97}],"november":[{"firstName":"Islom","lastName":"Norqulov","subject":"History","percent":73},{"firstName":"Alisher","lastName":"Mamatqulov","subject":"Mathematics","percent":94},{"firstName":"Adham","lastName":"Xudoyberdiyev","subject":"Art","percent":89},{"firstName":"Shohruh","lastName":"Odilov","subject":"English","percent":100},{"firstName":"Nargiza","lastName":"Abdullayev","subject":"Art","percent":73},{"firstName":"Nargiza","lastName":"Rustamov","subject":"Physical Education","percent":96},{"firstName":"Shohruh","lastName":"Rustamov","subject":"Physical Education","percent":83},{"firstName":"Madina","lastName":"Teshayev","subject":"Science","percent":74},{"firstName":"Aziz","lastName":"Ergashev","subject":"Geography","percent":81},{"firstName":"Jahongir","lastName":"Olimov","subject":"Music","percent":74},{"firstName":"Nodira","lastName":"Davlatov","subject":"Art","percent":88},{"firstName":"Adham","lastName":"Salimov","subject":"Physical Education","percent":100},{"firstName":"Bekzod","lastName":"Boboyev","subject":"English","percent":70},{"firstName":"Madina","lastName":"Norqulov","subject":"Science","percent":85},{"firstName":"Alisher","lastName":"Saidov","subject":"English","percent":96},{"firstName":"Rayhona","lastName":"Ibrohimov","subject":"Physical Education","percent":100}]},"5C":{"october":[{"firstName":"Aziz","lastName":"Aripov","subject":"English","percent":67},{"firstName":"Farrux","lastName":"Karimov","subject":"History","percent":83},{"firstName":"Nodira","lastName":"Aripov","subject":"Mathematics","percent":61},{"firstName":"Akmal","lastName":"Tursunov","subject":"Mathematics","percent":86},{"firstName":"Adham","lastName":"Komilov","subject":"Mathematics","percent":67},{"firstName":"Farrux","lastName":"Komilov","subject":"History","percent":88},{"firstName":"Islom","lastName":"Burhonov","subject":"Physical Education","percent":88},{"firstName":"Nargiza","lastName":"Hamidov","subject":"Science","percent":94},{"firstName":"Muhsin","lastName":"Abdullayev","subject":"Physical Education","percent":75},{"firstName":"Aziz","lastName":"Alimuhamedov","subject":"Music","percent":100},{"firstName":"Asadbek","lastName":"Nazarov","subject":"English","percent":89}],"november":[{"firstName":"Aziz","lastName":"Aripov","subject":"English","percent":100},{"firstName":"Farrux","lastName":"Karimov","subject":"History","percent":91},{"firstName":"Nodira","lastName":"Aripov","subject":"Mathematics","percent":88},{"firstName":"Akmal","lastName":"Tursunov","subject":"Mathematics","percent":100},{"firstName":"Adham","lastName":"Komilov","subject":"Mathematics","percent":70},{"firstName":"Farrux","lastName":"Komilov","subject":"History","percent":72},{"firstName":"Islom","lastName":"Burhonov","subject":"Physical Education","percent":96},{"firstName":"Nargiza","lastName":"Hamidov","subject":"Science","percent":94},{"firstName":"Muhsin","lastName":"Abdullayev","subject":"Physical Education","percent":71},{"firstName":"Aziz","lastName":"Alimuhamedov","subject":"Music","percent":98},{"firstName":"Asadbek","lastName":"Nazarov","subject":"English","percent":73}]},"5D":{"october":[{"firstName":"Elyor","lastName":"Yoqubov","subject":"Geography","percent":71},{"firstName":"Azim","lastName":"Ganiyev","subject":"Physical Education","percent":90},{"firstName":"Madina","lastName":"Hakimov","subject":"Geography","percent":76},{"firstName":"Nargiza","lastName":"Boboyev","subject":"Mathematics","percent":80},{"firstName":"Jahongir","lastName":"Mamatqulov","subject":"Mathematics","percent":99},{"firstName":"Muhammadali","lastName":"Olimov","subject":"Physical Education","percent":77},{"firstName":"Umida","lastName":"Sattorov","subject":"Science","percent":99},{"firstName":"Muhammadali","lastName":"Yusupov","subject":"English","percent":96},{"firstName":"Laziza","lastName":"Komilov","subject":"English","percent":67},{"firstName":"Alisher","lastName":"Tojiyev","subject":"Music","percent":67},{"firstName":"Malika","lastName":"Abdullayev","subject":"History","percent":88},{"firstName":"Nodira","lastName":"Jalolov","subject":"Mathematics","percent":62},{"firstName":"Oydin","lastName":"Gulomov","subject":"Music","percent":92},{"firstName":"Odil","lastName":"Olimov","subject":"Art","percent":64},{"firstName":"Elyor","lastName":"Yigitaliyev","subject":"Art","percent":91},{"firstName":"Aziz","lastName":"Teshayev","subject":"Music","percent":80}],"november":[{"firstName":"Elyor","lastName":"Yoqubov","subject":"Geography","percent":76},{"firstName":"Azim","lastName":"Ganiyev","subject":"Physical Education","percent":100},{"firstName":"Madina","lastName":"Hakimov","subject":"Geography","percent":81},{"firstName":"Nargiza","lastName":"Boboyev","subject":"Mathematics","percent":75},{"firstName":"Jahongir","lastName":"Mamatqulov","subject":"Mathematics","percent":84},{"firstName":"Muhammadali","lastName":"Olimov","subject":"Physical Education","percent":84},{"firstName":"Umida","lastName":"Sattorov","subject":"Science","percent":100},{"firstName":"Muhammadali","lastName":"Yusupov","subject":"English","percent":96},{"firstName":"Laziza","lastName":"Komilov","subject":"English","percent":92},{"firstName":"Alisher","lastName":"Tojiyev","subject":"Music","percent":93},{"firstName":"Malika","lastName":"Abdullayev","subject":"History","percent":75},{"firstName":"Nodira","lastName":"Jalolov","subject":"Mathematics","percent":72},{"firstName":"Oydin","lastName":"Gulomov","subject":"Music","percent":98},{"firstName":"Odil","lastName":"Olimov","subject":"Art","percent":87},{"firstName":"Elyor","lastName":"Yigitaliyev","subject":"Art","percent":100},{"firstName":"Aziz","lastName":"Teshayev","subject":"Music","percent":75}]},"6A":{"october":[{"firstName":"Gavhar","lastName":"Sobirov","subject":"English","percent":62},{"firstName":"Akmal","lastName":"Ganiyev","subject":"Science","percent":85},{"firstName":"Diyor","lastName":"Xudoyberdiyev","subject":"Art","percent":89},{"firstName":"Nodira","lastName":"Axmedov","subject":"Science","percent":75},{"firstName":"Azim","lastName":"Salimov","subject":"Mathematics","percent":85},{"firstName":"Ali","lastName":"Valiyev","subject":"Mathematics","percent":74},{"firstName":"Aziza","lastName":"Yigitaliyev","subject":"History","percent":78},{"firstName":"Odil","lastName":"Nazarov","subject":"Art","percent":100},{"firstName":"Jasur","lastName":"Axmedov","subject":"Music","percent":87},{"firstName":"Oydin","lastName":"Ergashev","subject":"Science","percent":90},{"firstName":"Aziz","lastName":"Islomov","subject":"Science","percent":81},{"firstName":"Dilnoza","lastName":"Karimov","subject":"Science","percent":79},{"firstName":"Jahongir","lastName":"Rasulov","subject":"Music","percent":75},{"firstName":"Odil","lastName":"Ergashev","subject":"History","percent":82},{"firstName":"Islom","lastName":"Islomov","subject":"English","percent":90},{"firstName":"Rayhona","lastName":"Xudoyberdiyev","subject":"Computer Science","percent":68}],"november":[{"firstName":"Gavhar","lastName":"Sobirov","subject":"English","percent":77},{"firstName":"Akmal","lastName":"Ganiyev","subject":"Science","percent":100},{"firstName":"Diyor","lastName":"Xudoyberdiyev","subject":"Art","percent":100},{"firstName":"Nodira","lastName":"Axmedov","subject":"Science","percent":82},{"firstName":"Azim","lastName":"Salimov","subject":"Mathematics","percent":96},{"firstName":"Ali","lastName":"Valiyev","subject":"Mathematics","percent":89},{"firstName":"Aziza","lastName":"Yigitaliyev","subject":"History","percent":84},{"firstName":"Odil","lastName":"Nazarov","subject":"Art","percent":95},{"firstName":"Jasur","lastName":"Axmedov","subject":"Music","percent":68},{"firstName":"Oydin","lastName":"Ergashev","subject":"Science","percent":74},{"firstName":"Aziz","lastName":"Islomov","subject":"Science","percent":67},{"firstName":"Dilnoza","lastName":"Karimov","subject":"Science","percent":100},{"firstName":"Jahongir","lastName":"Rasulov","subject":"Music","percent":81},{"firstName":"Odil","lastName":"Ergashev","subject":"History","percent":81},{"firstName":"Islom","lastName":"Islomov","subject":"English","percent":84},{"firstName":"Rayhona","lastName":"Xudoyberdiyev","subject":"Computer Science","percent":95}]},"6B":{"october":[{"firstName":"Gavhar","lastName":"Sobirov","subject":"Geography","percent":89},{"firstName":"Bobur","lastName":"Yigitaliyev","subject":"Music","percent":94},{"firstName":"Nodira","lastName":"Jalolov","subject":"Art","percent":74},{"firstName":"Mohira","lastName":"Usmonov","subject":"Computer Science","percent":94},{"firstName":"Alisher","lastName":"Yigitaliyev","subject":"Computer Science","percent":94},{"firstName":"Jahongir","lastName":"Islomov","subject":"English","percent":67},{"firstName":"Bobur","lastName":"Yusupov","subject":"Art","percent":90},{"firstName":"Bekzod","lastName":"Tojiyev","subject":"Geography","percent":96},{"firstName":"Adham","lastName":"Hakimov","subject":"Science","percent":74},{"firstName":"Kamola","lastName":"Xudoyberdiyev","subject":"History","percent":94},{"firstName":"Komil","lastName":"Bozorov","subject":"English","percent":75},{"firstName":"Mohira","lastName":"Mirzayev","subject":"History","percent":62},{"firstName":"Sitora","lastName":"Ganiyev","subject":"Music","percent":68},{"firstName":"Gulnoza","lastName":"Davlatov","subject":"History","percent":91},{"firstName":"Madina","lastName":"Rustamov","subject":"Mathematics","percent":55},{"firstName":"Sevinch","lastName":"Nazarov","subject":"Music","percent":83}],"november":[{"firstName":"Gavhar","lastName":"Sobirov","subject":"Geography","percent":81},{"firstName":"Bobur","lastName":"Yigitaliyev","subject":"Music","percent":100},{"firstName":"Nodira","lastName":"Jalolov","subject":"Art","percent":84},{"firstName":"Mohira","lastName":"Usmonov","subject":"Computer Science","percent":99},{"firstName":"Alisher","lastName":"Yigitaliyev","subject":"Computer Science","percent":80},{"firstName":"Jahongir","lastName":"Islomov","subject":"English","percent":88},{"firstName":"Bobur","lastName":"Yusupov","subject":"Art","percent":87},{"firstName":"Bekzod","lastName":"Tojiyev","subject":"Geography","percent":87},{"firstName":"Adham","lastName":"Hakimov","subject":"Science","percent":84},{"firstName":"Kamola","lastName":"Xudoyberdiyev","subject":"History","percent":69},{"firstName":"Komil","lastName":"Bozorov","subject":"English","percent":100},{"firstName":"Mohira","lastName":"Mirzayev","subject":"History","percent":77},{"firstName":"Sitora","lastName":"Ganiyev","subject":"Music","percent":75},{"firstName":"Gulnoza","lastName":"Davlatov","subject":"History","percent":87},{"firstName":"Madina","lastName":"Rustamov","subject":"Mathematics","percent":72},{"firstName":"Sevinch","lastName":"Nazarov","subject":"Music","percent":100}]},"6C":{"october":[{"firstName":"Ali","lastName":"Ibrohimov","subject":"Music","percent":76},{"firstName":"Diyor","lastName":"Ergashev","subject":"History","percent":84},{"firstName":"Gulnoza","lastName":"Aripov","subject":"Geography","percent":100},{"firstName":"Azim","lastName":"Mahmudov","subject":"Mathematics","percent":64},{"firstName":"Rayhona","lastName":"Rasulov","subject":"Music","percent":78},{"firstName":"Muhsin","lastName":"Islomov","subject":"Computer Science","percent":96},{"firstName":"Feruza","lastName":"Bozorov","subject":"Mathematics","percent":99},{"firstName":"Shohruh","lastName":"Olimov","subject":"Mathematics","percent":67},{"firstName":"Bekzod","lastName":"Rustamov","subject":"Music","percent":66},{"firstName":"Feruza","lastName":"Yoqubov","subject":"Science","percent":100},{"firstName":"Muhammadali","lastName":"Teshayev","subject":"Music","percent":67},{"firstName":"Abdulloh","lastName":"Yigitaliyev","subject":"Computer Science","percent":70},{"firstName":"Abdulloh","lastName":"Rasulov","subject":"Music","percent":84},{"firstName":"Islom","lastName":"Mirzayev","subject":"Geography","percent":93},{"firstName":"Bekzod","lastName":"Alimuhamedov","subject":"Mathematics","percent":81}],"november":[{"firstName":"Ali","lastName":"Ibrohimov","subject":"Music","percent":91},{"firstName":"Diyor","lastName":"Ergashev","subject":"History","percent":90},{"firstName":"Gulnoza","lastName":"Aripov","subject":"Geography","percent":78},{"firstName":"Azim","lastName":"Mahmudov","subject":"Mathematics","percent":75},{"firstName":"Rayhona","lastName":"Rasulov","subject":"Music","percent":79},{"firstName":"Muhsin","lastName":"Islomov","subject":"Computer Science","percent":90},{"firstName":"Feruza","lastName":"Bozorov","subject":"Mathematics","percent":100},{"firstName":"Shohruh","lastName":"Olimov","subject":"Mathematics","percent":83},{"firstName":"Bekzod","lastName":"Rustamov","subject":"Music","percent":93},{"firstName":"Feruza","lastName":"Yoqubov","subject":"Science","percent":70},{"firstName":"Muhammadali","lastName":"Teshayev","subject":"Music","percent":66},{"firstName":"Abdulloh","lastName":"Yigitaliyev","subject":"Computer Science","percent":95},{"firstName":"Abdulloh","lastName":"Rasulov","subject":"Music","percent":92},{"firstName":"Islom","lastName":"Mirzayev","subject":"Geography","percent":85},{"firstName":"Bekzod","lastName":"Alimuhamedov","subject":"Mathematics","percent":92}]},"7A":{"october":[{"firstName":"Sardor","lastName":"Saidov","subject":"Biology","percent":94},{"firstName":"Akbar","lastName":"Yoqubov","subject":"Computer Science","percent":72},{"firstName":"Madina","lastName":"Saidov","subject":"English Literature","percent":77},{"firstName":"Muhsin","lastName":"Sattorov","subject":"Computer Science","percent":57},{"firstName":"Islom","lastName":"Bozorov","subject":"Physical Education","percent":66},{"firstName":"Diyor","lastName":"Alimuhamedov","subject":"World History","percent":88},{"firstName":"Azim","lastName":"Qodirov","subject":"Geography","percent":82},{"firstName":"Islom","lastName":"Mamatqulov","subject":"Physical Education","percent":96},{"firstName":"Aziz","lastName":"Gulomov","subject":"Biology","percent":65},{"firstName":"Asilbek","lastName":"Tojiyev","subject":"Physical Education","percent":79},{"firstName":"Mohira","lastName":"Abdullayev","subject":"Geography","percent":90},{"firstName":"Odil","lastName":"Ibrohimov","subject":"Biology","percent":84},{"firstName":"Kamola","lastName":"Mahmudov","subject":"Physical Education","percent":93},{"firstName":"Abdulloh","lastName":"Muminov","subject":"World History","percent":93},{"firstName":"Nargiza","lastName":"Toshpulatov","subject":"Physical Education","percent":85},{"firstName":"Elyor","lastName":"Rasulov","subject":"Biology","percent":90},{"firstName":"Shahnoza","lastName":"Ganiyev","subject":"Biology","percent":75}],"november":[{"firstName":"Sardor","lastName":"Saidov","subject":"Biology","percent":80},{"firstName":"Akbar","lastName":"Yoqubov","subject":"Computer Science","percent":82},{"firstName":"Madina","lastName":"Saidov","subject":"English Literature","percent":76},{"firstName":"Muhsin","lastName":"Sattorov","subject":"Computer Science","percent":99},{"firstName":"Islom","lastName":"Bozorov","subject":"Physical Education","percent":79},{"firstName":"Diyor","lastName":"Alimuhamedov","subject":"World History","percent":77},{"firstName":"Azim","lastName":"Qodirov","subject":"Geography","percent":88},{"firstName":"Islom","lastName":"Mamatqulov","subject":"Physical Education","percent":81},{"firstName":"Aziz","lastName":"Gulomov","subject":"Biology","percent":99},{"firstName":"Asilbek","lastName":"Tojiyev","subject":"Physical Education","percent":73},{"firstName":"Mohira","lastName":"Abdullayev","subject":"Geography","percent":75},{"firstName":"Odil","lastName":"Ibrohimov","subject":"Biology","percent":100},{"firstName":"Kamola","lastName":"Mahmudov","subject":"Physical Education","percent":87},{"firstName":"Abdulloh","lastName":"Muminov","subject":"World History","percent":91},{"firstName":"Nargiza","lastName":"Toshpulatov","subject":"Physical Education","percent":93},{"firstName":"Elyor","lastName":"Rasulov","subject":"Biology","percent":79},{"firstName":"Shahnoza","lastName":"Ganiyev","subject":"Biology","percent":96}]},"7B":{"october":[{"firstName":"Oybek","lastName":"Salimov","subject":"Computer Science","percent":95},{"firstName":"Sevinch","lastName":"Mahmudov","subject":"Algebra","percent":96},{"firstName":"Behruz","lastName":"Abdullayev","subject":"Biology","percent":96},{"firstName":"Komil","lastName":"Alimuhamedov","subject":"World History","percent":70},{"firstName":"Farrux","lastName":"Muminov","subject":"Algebra","percent":61},{"firstName":"Elyor","lastName":"Alimuhamedov","subject":"Algebra","percent":89},{"firstName":"Akmal","lastName":"Davlatov","subject":"World History","percent":58},{"firstName":"Akmal","lastName":"Abdullayev","subject":"Computer Science","percent":98},{"firstName":"Alisher","lastName":"Boboyev","subject":"English Literature","percent":68},{"firstName":"Madina","lastName":"Abdullayev","subject":"Biology","percent":86},{"firstName":"Bekzod","lastName":"Tojiyev","subject":"Algebra","percent":98},{"firstName":"Gavhar","lastName":"Mirzayev","subject":"Geography","percent":79},{"firstName":"Shahnoza","lastName":"Bozorov","subject":"English Literature","percent":69},{"firstName":"Jasur","lastName":"Sattorov","subject":"World History","percent":77}],"november":[{"firstName":"Oybek","lastName":"Salimov","subject":"Computer Science","percent":95},{"firstName":"Sevinch","lastName":"Mahmudov","subject":"Algebra","percent":74},{"firstName":"Behruz","lastName":"Abdullayev","subject":"Biology","percent":93},{"firstName":"Komil","lastName":"Alimuhamedov","subject":"World History","percent":83},{"firstName":"Farrux","lastName":"Muminov","subject":"Algebra","percent":84},{"firstName":"Elyor","lastName":"Alimuhamedov","subject":"Algebra","percent":81},{"firstName":"Akmal","lastName":"Davlatov","subject":"World History","percent":81},{"firstName":"Akmal","lastName":"Abdullayev","subject":"Computer Science","percent":100},{"firstName":"Alisher","lastName":"Boboyev","subject":"English Literature","percent":92},{"firstName":"Madina","lastName":"Abdullayev","subject":"Biology","percent":79},{"firstName":"Bekzod","lastName":"Tojiyev","subject":"Algebra","percent":84},{"firstName":"Gavhar","lastName":"Mirzayev","subject":"Geography","percent":100},{"firstName":"Shahnoza","lastName":"Bozorov","subject":"English Literature","percent":69},{"firstName":"Jasur","lastName":"Sattorov","subject":"World History","percent":84}]},"7C":{"october":[{"firstName":"Oybek","lastName":"Nabiev","subject":"Computer Science","percent":69},{"firstName":"Shohruh","lastName":"Odilov","subject":"Geography","percent":82},{"firstName":"Diyor","lastName":"Mahmudov","subject":"World History","percent":59},{"firstName":"Bekzod","lastName":"Jalolov","subject":"Algebra","percent":61},{"firstName":"Azim","lastName":"Ergashev","subject":"Biology","percent":85},{"firstName":"Shahnoza","lastName":"Teshayev","subject":"Algebra","percent":92},{"firstName":"Bekzod","lastName":"Aripov","subject":"Computer Science","percent":87},{"firstName":"Jamshid","lastName":"Olimov","subject":"Algebra","percent":99},{"firstName":"Sevinch","lastName":"Raximov","subject":"Physical Education","percent":78},{"firstName":"Islom","lastName":"Abdullayev","subject":"Algebra","percent":90},{"firstName":"Sevinch","lastName":"Muminov","subject":"World History","percent":81},{"firstName":"Sabina","lastName":"Rustamov","subject":"World History","percent":95},{"firstName":"Islom","lastName":"Muminov","subject":"Geography","percent":65},{"firstName":"Azim","lastName":"Norqulov","subject":"Physical Education","percent":78},{"firstName":"Gulnoza","lastName":"Gulomov","subject":"World History","percent":82},{"firstName":"Aziza","lastName":"Mirzayev","subject":"Biology","percent":91},{"firstName":"Abdulloh","lastName":"Burhonov","subject":"Algebra","percent":96}],"november":[{"firstName":"Oybek","lastName":"Nabiev","subject":"Computer Science","percent":100},{"firstName":"Shohruh","lastName":"Odilov","subject":"Geography","percent":97},{"firstName":"Diyor","lastName":"Mahmudov","subject":"World History","percent":67},{"firstName":"Bekzod","lastName":"Jalolov","subject":"Algebra","percent":88},{"firstName":"Azim","lastName":"Ergashev","subject":"Biology","percent":100},{"firstName":"Shahnoza","lastName":"Teshayev","subject":"Algebra","percent":73},{"firstName":"Bekzod","lastName":"Aripov","subject":"Computer Science","percent":100},{"firstName":"Jamshid","lastName":"Olimov","subject":"Algebra","percent":100},{"firstName":"Sevinch","lastName":"Raximov","subject":"Physical Education","percent":83},{"firstName":"Islom","lastName":"Abdullayev","subject":"Algebra","percent":82},{"firstName":"Sevinch","lastName":"Muminov","subject":"World History","percent":88},{"firstName":"Sabina","lastName":"Rustamov","subject":"World History","percent":69},{"firstName":"Islom","lastName":"Muminov","subject":"Geography","percent":78},{"firstName":"Azim","lastName":"Norqulov","subject":"Physical Education","percent":89},{"firstName":"Gulnoza","lastName":"Gulomov","subject":"World History","percent":85},{"firstName":"Aziza","lastName":"Mirzayev","subject":"Biology","percent":75},{"firstName":"Abdulloh","lastName":"Burhonov","subject":"Algebra","percent":100}]},"8A":{"october":[{"firstName":"Islom","lastName":"Mirzayev","subject":"Biology","percent":94},{"firstName":"Umida","lastName":"Odilov","subject":"Chemistry","percent":83},{"firstName":"Behruz","lastName":"Jurayev","subject":"Computer Science","percent":86},{"firstName":"Ali","lastName":"Olimov","subject":"World History","percent":100},{"firstName":"Odil","lastName":"Mahmudov","subject":"Chemistry","percent":87},{"firstName":"Madina","lastName":"Usmonov","subject":"World History","percent":93},{"firstName":"Komil","lastName":"Toshpulatov","subject":"Biology","percent":69},{"firstName":"Gavhar","lastName":"Hamidov","subject":"Physics","percent":63},{"firstName":"Mohira","lastName":"Mamatqulov","subject":"Chemistry","percent":85},{"firstName":"Asadbek","lastName":"Ganiyev","subject":"English Literature","percent":78},{"firstName":"Jamshid","lastName":"Ibrohimov","subject":"English Literature","percent":62}],"november":[{"firstName":"Islom","lastName":"Mirzayev","subject":"Biology","percent":72},{"firstName":"Umida","lastName":"Odilov","subject":"Chemistry","percent":83},{"firstName":"Behruz","lastName":"Jurayev","subject":"Computer Science","percent":85},{"firstName":"Ali","lastName":"Olimov","subject":"World History","percent":98},{"firstName":"Odil","lastName":"Mahmudov","subject":"Chemistry","percent":71},{"firstName":"Madina","lastName":"Usmonov","subject":"World History","percent":92},{"firstName":"Komil","lastName":"Toshpulatov","subject":"Biology","percent":89},{"firstName":"Gavhar","lastName":"Hamidov","subject":"Physics","percent":74},{"firstName":"Mohira","lastName":"Mamatqulov","subject":"Chemistry","percent":89},{"firstName":"Asadbek","lastName":"Ganiyev","subject":"English Literature","percent":98},{"firstName":"Jamshid","lastName":"Ibrohimov","subject":"English Literature","percent":93}]},"8B":{"october":[{"firstName":"Sardor","lastName":"Norqulov","subject":"Computer Science","percent":84},{"firstName":"Sardor","lastName":"Usmonov","subject":"English Literature","percent":61},{"firstName":"Oybek","lastName":"Nabiev","subject":"Algebra","percent":90},{"firstName":"Nigina","lastName":"Mamatqulov","subject":"Chemistry","percent":99},{"firstName":"Muhammadali","lastName":"Jurayev","subject":"Biology","percent":87},{"firstName":"Abror","lastName":"Saidov","subject":"English Literature","percent":74},{"firstName":"Aziz","lastName":"Sattorov","subject":"Physics","percent":88},{"firstName":"Jamshid","lastName":"Raximov","subject":"Chemistry","percent":69},{"firstName":"Laziza","lastName":"Islomov","subject":"English Literature","percent":85},{"firstName":"Bekzod","lastName":"Bozorov","subject":"Chemistry","percent":65},{"firstName":"Rayhona","lastName":"Bozorov","subject":"Computer Science","percent":83},{"firstName":"Aziz","lastName":"Mahmudov","subject":"World History","percent":79},{"firstName":"Madina","lastName":"Aripov","subject":"Physics","percent":77},{"firstName":"Akbar","lastName":"Teshayev","subject":"Physics","percent":100},{"firstName":"Elyor","lastName":"Burhonov","subject":"Algebra","percent":76},{"firstName":"Mohira","lastName":"Jurayev","subject":"Computer Science","percent":88}],"november":[{"firstName":"Sardor","lastName":"Norqulov","subject":"Computer Science","percent":80},{"firstName":"Sardor","lastName":"Usmonov","subject":"English Literature","percent":80},{"firstName":"Oybek","lastName":"Nabiev","subject":"Algebra","percent":88},{"firstName":"Nigina","lastName":"Mamatqulov","subject":"Chemistry","percent":96},{"firstName":"Muhammadali","lastName":"Jurayev","subject":"Biology","percent":71},{"firstName":"Abror","lastName":"Saidov","subject":"English Literature","percent":98},{"firstName":"Aziz","lastName":"Sattorov","subject":"Physics","percent":86},{"firstName":"Jamshid","lastName":"Raximov","subject":"Chemistry","percent":98},{"firstName":"Laziza","lastName":"Islomov","subject":"English Literature","percent":83},{"firstName":"Bekzod","lastName":"Bozorov","subject":"Chemistry","percent":100},{"firstName":"Rayhona","lastName":"Bozorov","subject":"Computer Science","percent":98},{"firstName":"Aziz","lastName":"Mahmudov","subject":"World History","percent":74},{"firstName":"Madina","lastName":"Aripov","subject":"Physics","percent":74},{"firstName":"Akbar","lastName":"Teshayev","subject":"Physics","percent":75},{"firstName":"Elyor","lastName":"Burhonov","subject":"Algebra","percent":100},{"firstName":"Mohira","lastName":"Jurayev","subject":"Computer Science","percent":78}]},"9A":{"october":[{"firstName":"Bobur","lastName":"Ergashev","subject":"History","percent":73},{"firstName":"Malika","lastName":"Yoqubov","subject":"Literature","percent":98},{"firstName":"Madina","lastName":"Aripov","subject":"Computer Science","percent":97},{"firstName":"Gavhar","lastName":"Valiyev","subject":"Literature","percent":81},{"firstName":"Shohruh","lastName":"Sobirov","subject":"Chemistry","percent":71},{"firstName":"Diyor","lastName":"Fayziyev","subject":"Economics","percent":74},{"firstName":"Abror","lastName":"Raximov","subject":"Chemistry","percent":86},{"firstName":"Nodira","lastName":"Ibrohimov","subject":"History","percent":86},{"firstName":"Sardor","lastName":"Raximov","subject":"Physics","percent":92},{"firstName":"Komil","lastName":"Karimov","subject":"History","percent":95},{"firstName":"Oydin","lastName":"Aripov","subject":"Literature","percent":90},{"firstName":"Akbar","lastName":"Yoqubov","subject":"Chemistry","percent":87},{"firstName":"Daler","lastName":"Mirzayev","subject":"Literature","percent":83},{"firstName":"Feruza","lastName":"Xudoyberdiyev","subject":"Geometry","percent":65},{"firstName":"Ali","lastName":"Mahmudov","subject":"Literature","percent":59},{"firstName":"Sardor","lastName":"Tojiyev","subject":"Biology","percent":68},{"firstName":"Rayhona","lastName":"Yoqubov","subject":"History","percent":83}],"november":[{"firstName":"Bobur","lastName":"Ergashev","subject":"History","percent":88},{"firstName":"Malika","lastName":"Yoqubov","subject":"Literature","percent":83},{"firstName":"Madina","lastName":"Aripov","subject":"Computer Science","percent":95},{"firstName":"Gavhar","lastName":"Valiyev","subject":"Literature","percent":82},{"firstName":"Shohruh","lastName":"Sobirov","subject":"Chemistry","percent":72},{"firstName":"Diyor","lastName":"Fayziyev","subject":"Economics","percent":100},{"firstName":"Abror","lastName":"Raximov","subject":"Chemistry","percent":95},{"firstName":"Nodira","lastName":"Ibrohimov","subject":"History","percent":70},{"firstName":"Sardor","lastName":"Raximov","subject":"Physics","percent":77},{"firstName":"Komil","lastName":"Karimov","subject":"History","percent":100},{"firstName":"Oydin","lastName":"Aripov","subject":"Literature","percent":98},{"firstName":"Akbar","lastName":"Yoqubov","subject":"Chemistry","percent":92},{"firstName":"Daler","lastName":"Mirzayev","subject":"Literature","percent":89},{"firstName":"Feruza","lastName":"Xudoyberdiyev","subject":"Geometry","percent":81},{"firstName":"Ali","lastName":"Mahmudov","subject":"Literature","percent":100},{"firstName":"Sardor","lastName":"Tojiyev","subject":"Biology","percent":67},{"firstName":"Rayhona","lastName":"Yoqubov","subject":"History","percent":77}]},"9B":{"october":[{"firstName":"Kamola","lastName":"Muminov","subject":"Chemistry","percent":81},{"firstName":"Muhammadali","lastName":"Salimov","subject":"Computer Science","percent":88},{"firstName":"Sabina","lastName":"Fayziyev","subject":"Literature","percent":68},{"firstName":"Komil","lastName":"Usmonov","subject":"History","percent":86},{"firstName":"Umida","lastName":"Olimov","subject":"Literature","percent":99},{"firstName":"Asilbek","lastName":"Yusupov","subject":"Physics","percent":67},{"firstName":"Oydin","lastName":"Xudoyberdiyev","subject":"Chemistry","percent":73},{"firstName":"Mohira","lastName":"Rustamov","subject":"Geometry","percent":65},{"firstName":"Muhammadali","lastName":"Alimuhamedov","subject":"Computer Science","percent":80},{"firstName":"Azim","lastName":"Raximov","subject":"Literature","percent":97},{"firstName":"Gulnoza","lastName":"Tursunov","subject":"Economics","percent":82},{"firstName":"Akmal","lastName":"Gulomov","subject":"History","percent":88},{"firstName":"Shahnoza","lastName":"Nasrullayev","subject":"Literature","percent":73},{"firstName":"Feruza","lastName":"Odilov","subject":"History","percent":87},{"firstName":"Rayhona","lastName":"Jalolov","subject":"Chemistry","percent":88}],"november":[{"firstName":"Kamola","lastName":"Muminov","subject":"Chemistry","percent":95},{"firstName":"Muhammadali","lastName":"Salimov","subject":"Computer Science","percent":89},{"firstName":"Sabina","lastName":"Fayziyev","subject":"Literature","percent":100},{"firstName":"Komil","lastName":"Usmonov","subject":"History","percent":88},{"firstName":"Umida","lastName":"Olimov","subject":"Literature","percent":90},{"firstName":"Asilbek","lastName":"Yusupov","subject":"Physics","percent":75},{"firstName":"Oydin","lastName":"Xudoyberdiyev","subject":"Chemistry","percent":88},{"firstName":"Mohira","lastName":"Rustamov","subject":"Geometry","percent":73},{"firstName":"Muhammadali","lastName":"Alimuhamedov","subject":"Computer Science","percent":81},{"firstName":"Azim","lastName":"Raximov","subject":"Literature","percent":95},{"firstName":"Gulnoza","lastName":"Tursunov","subject":"Economics","percent":86},{"firstName":"Akmal","lastName":"Gulomov","subject":"History","percent":69},{"firstName":"Shahnoza","lastName":"Nasrullayev","subject":"Literature","percent":89},{"firstName":"Feruza","lastName":"Odilov","subject":"History","percent":70},{"firstName":"Rayhona","lastName":"Jalolov","subject":"Chemistry","percent":100}]},"10A":{"october":[{"firstName":"Gavhar","lastName":"Bozorov","subject":"Geometry","percent":87},{"firstName":"Shahnoza","lastName":"Burhonov","subject":"History","percent":67},{"firstName":"Kamola","lastName":"Muminov","subject":"History","percent":91},{"firstName":"Oybek","lastName":"Nabiev","subject":"Computer Science","percent":74},{"firstName":"Aziza","lastName":"Sobirov","subject":"Physics","percent":67},{"firstName":"Madina","lastName":"Abdullayev","subject":"Economics","percent":88},{"firstName":"Akmal","lastName":"Nasrullayev","subject":"Geometry","percent":57},{"firstName":"Bekzod","lastName":"Ergashev","subject":"Chemistry","percent":77},{"firstName":"Rayhona","lastName":"Mirzayev","subject":"Philosophy","percent":100},{"firstName":"Farrux","lastName":"Islomov","subject":"Computer Science","percent":93},{"firstName":"Ali","lastName":"Qodirov","subject":"Computer Science","percent":73},{"firstName":"Jasur","lastName":"Abdullayev","subject":"Literature","percent":90},{"firstName":"Muhammadali","lastName":"Nasrullayev","subject":"Physics","percent":89},{"firstName":"Sevinch","lastName":"Bozorov","subject":"Geometry","percent":80},{"firstName":"Alisher","lastName":"Gulomov","subject":"History","percent":83},{"firstName":"Asilbek","lastName":"Burhonov","subject":"Economics","percent":88}],"november":[{"firstName":"Gavhar","lastName":"Bozorov","subject":"Geometry","percent":94},{"firstName":"Shahnoza","lastName":"Burhonov","subject":"History","percent":76},{"firstName":"Kamola","lastName":"Muminov","subject":"History","percent":100},{"firstName":"Oybek","lastName":"Nabiev","subject":"Computer Science","percent":100},{"firstName":"Aziza","lastName":"Sobirov","subject":"Physics","percent":85},{"firstName":"Madina","lastName":"Abdullayev","subject":"Economics","percent":91},{"firstName":"Akmal","lastName":"Nasrullayev","subject":"Geometry","percent":93},{"firstName":"Bekzod","lastName":"Ergashev","subject":"Chemistry","percent":100},{"firstName":"Rayhona","lastName":"Mirzayev","subject":"Philosophy","percent":90},{"firstName":"Farrux","lastName":"Islomov","subject":"Computer Science","percent":66},{"firstName":"Ali","lastName":"Qodirov","subject":"Computer Science","percent":96},{"firstName":"Jasur","lastName":"Abdullayev","subject":"Literature","percent":98},{"firstName":"Muhammadali","lastName":"Nasrullayev","subject":"Physics","percent":66},{"firstName":"Sevinch","lastName":"Bozorov","subject":"Geometry","percent":79},{"firstName":"Alisher","lastName":"Gulomov","subject":"History","percent":68},{"firstName":"Asilbek","lastName":"Burhonov","subject":"Economics","percent":74}]},"11A":{"october":[{"firstName":"Bekzod","lastName":"Saidov","subject":"Literature","percent":90},{"firstName":"Aziz","lastName":"Saidov","subject":"Economics","percent":95},{"firstName":"Sabina","lastName":"Gulomov","subject":"Economics","percent":86},{"firstName":"Ali","lastName":"Ergashev","subject":"Computer Science","percent":66},{"firstName":"Adham","lastName":"Rasulov","subject":"Physics","percent":85},{"firstName":"Akmal","lastName":"Yusupov","subject":"Literature","percent":80},{"firstName":"Sabina","lastName":"Yusupov","subject":"Chemistry","percent":62},{"firstName":"Jasur","lastName":"Toshpulatov","subject":"Computer Science","percent":99},{"firstName":"Muhsin","lastName":"Rustamov","subject":"Physics","percent":70},{"firstName":"Aziz","lastName":"Nazarov","subject":"Physics","percent":93},{"firstName":"Elyor","lastName":"Hakimov","subject":"Physics","percent":90},{"firstName":"Shahnoza","lastName":"Nasrullayev","subject":"Literature","percent":63},{"firstName":"Laziza","lastName":"Norqulov","subject":"Philosophy","percent":81},{"firstName":"Mohira","lastName":"Abdullayev","subject":"Philosophy","percent":88},{"firstName":"Alisher","lastName":"Abdullayev","subject":"Computer Science","percent":79}],"november":[{"firstName":"Bekzod","lastName":"Saidov","subject":"Literature","percent":100},{"firstName":"Aziz","lastName":"Saidov","subject":"Economics","percent":77},{"firstName":"Sabina","lastName":"Gulomov","subject":"Economics","percent":86},{"firstName":"Ali","lastName":"Ergashev","subject":"Computer Science","percent":73},{"firstName":"Adham","lastName":"Rasulov","subject":"Physics","percent":100},{"firstName":"Akmal","lastName":"Yusupov","subject":"Literature","percent":95},{"firstName":"Sabina","lastName":"Yusupov","subject":"Chemistry","percent":73},{"firstName":"Jasur","lastName":"Toshpulatov","subject":"Computer Science","percent":69},{"firstName":"Muhsin","lastName":"Rustamov","subject":"Physics","percent":96},{"firstName":"Aziz","lastName":"Nazarov","subject":"Physics","percent":88},{"firstName":"Elyor","lastName":"Hakimov","subject":"Physics","percent":90},{"firstName":"Shahnoza","lastName":"Nasrullayev","subject":"Literature","percent":79},{"firstName":"Laziza","lastName":"Norqulov","subject":"Philosophy","percent":73},{"firstName":"Mohira","lastName":"Abdullayev","subject":"Philosophy","percent":93},{"firstName":"Alisher","lastName":"Abdullayev","subject":"Computer Science","percent":97}]}};
+
+const CLASS_ORDER = ["5A","5B","5C","5D","6A","6B","6C","7A","7B","7C","8A","8B","9A","9B","10A","11A"];
+
+const AVATAR_PALETTE = [
+  ["#7c5cff","#22d3ee"],["#f472b6","#a78bfa"],["#22c55e","#22d3ee"],
+  ["#f59e0b","#ef4444"],["#22d3ee","#7c5cff"],["#a78bfa","#22c55e"],
+  ["#ef4444","#f472b6"],["#06b6d4","#8b5cf6"]
+];
+function avatarFor(name){
+  let h = 0;
+  for(const ch of name) h = (h*31 + ch.charCodeAt(0)) >>> 0;
+  const pair = AVATAR_PALETTE[h % AVATAR_PALETTE.length];
+  return `linear-gradient(135deg, ${pair[0]}, ${pair[1]})`;
+}
+function initials(f,l){ return (f[0]||"") + (l[0]||""); }
+
+function barClass(p){
+  if(p < 70) return "low";
+  if(p < 85) return "mid";
+  return "high";
+}
+
+function avg(arr){
+  if(!arr.length) return 0;
+  return arr.reduce((a,b)=>a+b.percent,0) / arr.length;
+}
+
+const state = {
+  search: "",
+  classFilter: "all",
+  sort: "none",
+  view: "both",
+  sortState: {} // per-card e.g. {"oct-5A": {key:"percent", dir:"desc"}}
+};
+
+function buildSidebar(){
+  const grid = document.getElementById("classesGrid");
+  const filter = document.getElementById("classFilter");
+  grid.innerHTML = "";
+  const allBtn = document.createElement("button");
+  allBtn.className = "class-chip active";
+  allBtn.textContent = "All";
+  allBtn.dataset.class = "all";
+  grid.appendChild(allBtn);
+  for(const c of CLASS_ORDER){
+    const b = document.createElement("button");
+    b.className = "class-chip";
+    b.textContent = c;
+    b.dataset.class = c;
+    grid.appendChild(b);
+
+    const opt = document.createElement("option");
+    opt.value = c; opt.textContent = `Class ${c}`;
+    filter.appendChild(opt);
+  }
+  grid.addEventListener("click",(e)=>{
+    const t = e.target.closest(".class-chip");
+    if(!t) return;
+    [...grid.children].forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    state.classFilter = t.dataset.class;
+    filter.value = t.dataset.class;
+    render();
+  });
+}
+
+function buildKpis(){
+  const kpiHost = document.getElementById("kpis");
+  const allOct = CLASS_ORDER.flatMap(c => DATA[c].october);
+  const allNov = CLASS_ORDER.flatMap(c => DATA[c].november);
+  const octAvg = avg(allOct);
+  const novAvg = avg(allNov);
+  const improved = novAvg - octAvg;
+  const students = allOct.length;
+
+  kpiHost.innerHTML = `
+    <div class="kpi">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 4 4 5-6"/></svg></div>
+      <h4>Students tracked</h4>
+      <div class="val">${students}</div>
+      <div class="delta">across ${CLASS_ORDER.length} classes</div>
+    </div>
+    <div class="kpi">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <h4>October average</h4>
+      <div class="val">${octAvg.toFixed(1)}%</div>
+      <div class="delta">baseline month</div>
+    </div>
+    <div class="kpi">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div>
+      <h4>November average</h4>
+      <div class="val">${novAvg.toFixed(1)}%</div>
+      <div class="delta ${improved>=0?'':'bad'}">${improved>=0?'▲':'▼'} ${Math.abs(improved).toFixed(1)}% vs Oct</div>
+    </div>
+    <div class="kpi">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.8 7.1 17.2 8 11.7 4 7.8 9.5 7z"/></svg></div>
+      <h4>Top class (Nov)</h4>
+      <div class="val" id="topClass">–</div>
+      <div class="delta" id="topClassVal"></div>
+    </div>
+  `;
+  // top class
+  let top = {name:"", val:-1};
+  for(const c of CLASS_ORDER){
+    const a = avg(DATA[c].november);
+    if(a > top.val){ top = {name:c, val:a}; }
+  }
+  document.getElementById("topClass").textContent = top.name;
+  document.getElementById("topClassVal").textContent = `${top.val.toFixed(1)}% average`;
+}
+
+function filterStudents(students){
+  const q = state.search.trim().toLowerCase();
+  if(!q) return students;
+  return students.filter(s =>
+    (s.firstName+" "+s.lastName).toLowerCase().includes(q) ||
+    s.firstName.toLowerCase().includes(q) ||
+    s.lastName.toLowerCase().includes(q) ||
+    s.subject.toLowerCase().includes(q)
+  );
+}
+
+function sortStudents(students, cardKey){
+  const perCard = state.sortState[cardKey];
+  let arr = students.slice();
+  if(perCard){
+    const {key, dir} = perCard;
+    arr.sort((a,b)=>{
+      let va = a[key], vb = b[key];
+      if(typeof va === "string"){ va = va.toLowerCase(); vb = vb.toLowerCase(); }
+      if(va < vb) return dir === "asc" ? -1 : 1;
+      if(va > vb) return dir === "asc" ? 1 : -1;
+      return 0;
+    });
+  } else if(state.sort !== "none"){
+    arr.sort((a,b)=> state.sort === "asc" ? a.percent - b.percent : b.percent - a.percent);
+  }
+  return arr;
+}
+
+function renderCard(month, cls){
+  const students = DATA[cls][month];
+  const filtered = filterStudents(students);
+  const cardKey = `${month}-${cls}`;
+  const list = sortStudents(filtered, cardKey);
+  const a = avg(students);
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.dataset.class = cls;
+
+  const sortKey = state.sortState[cardKey]?.key;
+  const sortDir = state.sortState[cardKey]?.dir;
+  const arrowCls = k => sortKey===k ? (sortDir==="asc"?"sort-asc":"sort-desc") : "";
+
+  card.innerHTML = `
+    <div class="card-head">
+      <div class="class-tag">Class ${cls}</div>
+      <h3>${month === "october" ? "October 28" : "November 28"}</h3>
+      <div class="meta">
+        <span><b>${students.length}</b> students</span>
+        <span class="avg">${a.toFixed(1)}% avg</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable ${arrowCls('firstName')}" data-key="firstName">Student <span class="arrow"></span></th>
+            <th class="sortable ${arrowCls('subject')}" data-key="subject">Subject <span class="arrow"></span></th>
+            <th class="sortable ${arrowCls('percent')}" data-key="percent" style="width:40%">Performance <span class="arrow"></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.length === 0
+            ? `<tr><td colspan="3" class="empty">No matching students</td></tr>`
+            : list.map(s => {
+                const p = s.percent;
+                const cl = barClass(p);
+                const full = `${s.firstName} ${s.lastName}`;
+                return `
+                <tr>
+                  <td>
+                    <div class="name-cell">
+                      <span class="avatar" style="background:${avatarFor(full)}">${initials(s.firstName,s.lastName)}</span>
+                      <span class="who">
+                        <span>${s.firstName} ${s.lastName}</span>
+                        <small>Class ${cls}</small>
+                      </span>
+                    </div>
+                  </td>
+                  <td><span class="subject-chip">${s.subject}</span></td>
+                  <td>
+                    <div class="perc">
+                      <div class="bar ${cl}"><span style="width:${p}%"></span></div>
+                      <div class="pct-text ${cl}">${p}%</div>
+                    </div>
+                  </td>
+                </tr>`;
+              }).join("")
+          }
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  // column sort click
+  card.querySelectorAll("thead th.sortable").forEach(th=>{
+    th.addEventListener("click", ()=>{
+      const key = th.dataset.key;
+      const cur = state.sortState[cardKey];
+      let dir = "asc";
+      if(cur && cur.key === key) dir = cur.dir === "asc" ? "desc" : "asc";
+      state.sortState[cardKey] = {key, dir};
+      render();
+    });
+  });
+
+  return card;
+}
+
+function render(){
+  const gridOct = document.getElementById("grid-oct");
+  const gridNov = document.getElementById("grid-nov");
+  gridOct.innerHTML = "";
+  gridNov.innerHTML = "";
+
+  const classes = state.classFilter === "all" ? CLASS_ORDER : [state.classFilter];
+
+  for(const c of classes){
+    gridOct.appendChild(renderCard("october", c));
+    gridNov.appendChild(renderCard("november", c));
+  }
+
+  // view switch
+  document.getElementById("report-oct").style.display = (state.view === "nov") ? "none" : "";
+  document.getElementById("report-nov").style.display = (state.view === "oct") ? "none" : "";
+}
+
+function bindControls(){
+  document.getElementById("search").addEventListener("input", (e)=>{
+    state.search = e.target.value; render();
+  });
+  document.getElementById("classFilter").addEventListener("change",(e)=>{
+    state.classFilter = e.target.value;
+    // sync chips
+    document.querySelectorAll(".class-chip").forEach(ch=>{
+      ch.classList.toggle("active", ch.dataset.class === state.classFilter);
+    });
+    render();
+  });
+  document.getElementById("sortSelect").addEventListener("change",(e)=>{
+    state.sort = e.target.value;
+    state.sortState = {}; // clear per-column sort when using global sort
+    render();
+  });
+  document.getElementById("viewSwitch").addEventListener("click",(e)=>{
+    const b = e.target.closest("button"); if(!b) return;
+    document.querySelectorAll("#viewSwitch button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    state.view = b.dataset.view;
+    render();
+  });
+}
+
+buildSidebar();
+buildKpis();
+bindControls();
+render();
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
