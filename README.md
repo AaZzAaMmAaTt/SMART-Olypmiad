@@ -1,4 +1,3 @@
-# SMART-Olypmiad
 # SMART Olympiad Platform (Static Frontend)
 
 ## Project Goal
